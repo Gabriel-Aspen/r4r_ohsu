@@ -1,0 +1,121 @@
+```{r}
+library(tidyverse)
+library(readxl)
+
+smoke_complete <- readexcel("data/smoke_complete.xlsx",
+sheet = 1,
+na = "NA")
+
+# remove some columns - we'll talk about this later
+smoke_complete <- smoke_complete %>%
+  select(age_at_diagnosis, tumor_stage,
+         cigarettes_per_day, gender,
+         vital_status, disease)
+```
+## Customizing a Scatterplot
+```{r}
+our_plot <- ggplot(smoke_complete) +
+
+  aes(x = age_at_diagnosis,
+      y = cigarettes_per_day,
+      color = disease) +
+
+  geom_point() +
+
+  labs(title = "Cigarettes per Day versus Age at Diagnosis",
+       x = "Age at Diagnosis",
+       y = "Cigarettes Smoked per Day")
+
+our_plot
+```
+# Changing visual properties using built in themes
+```{r}
+our_plot +
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle = 45))
+```
+## Themes: [here](https://ggplot2.tidyverse.org/reference/ggtheme.html)
+
+
+# Categorical Data
+- Factors: easier to organize categories. We will touch on this in the next chapter
+
+# Boxplots
+
+```{r}
+ggplot(smoke_complete) +
+
+  aes(x = vital_status,
+      y = cigarettes_per_day,
+      fill = vital_status) +
+
+  geom_boxplot()
+```
+## Adding subplots
+- Facet wrap requires "disease" to be wrapped in vars()
+- We also added a limit on the y axis
+- Puts data on one scale which is nice
+
+```{r}
+ggplot(smoke_complete) +
+
+  aes(x = vital_status,
+      y = cigarettes_per_day,
+      fill = vital_status) +
+
+  geom_boxplot() +
+
+  ylim(c(0,20)) +
+
+  facet_wrap(vars(disease))
+```
+
+# Data Manipulation with dplyr
+
+- `arrange()` - sorting a `data.frame` by a variable
+  - Descending order: arrange(desc()). Or just put "-" in front of the name
+  - Can also sort by multiple variables
+- `filter()` - subsetting a `data.frame` by criteria
+  - ex: filter(cigarettes_per_day < 20)
+  Chain using "&" (AND) or "|" (OR)
+- `select()` - returning only a few columns from our `data.frame`
+  - "-" to select everything but the variable
+- `group_by()/summarize()` - summarizing our data.frame, such as counting and computing means
+- `mutate()` - transforming variables in our data
+- `%>%` - the pipe character, which lets us join our verbs together in a *pipeline*.
+
+## Examples
+```{r}
+smoke_complete %>%
+  filter(gender == "male" |
+           tumor_stage == "stage iv")
+
+# Multiple categories "%in%" operator
+smoke_complete %>%
+  filter(tumor_stage %in% c("stage ia", "stage ib"))
+
+# Everything but gender
+smoke_complete %>%
+  select(-gender)
+```
+## The difference between `filter()` and `select()`
+
+
+One thing to keep in mind is that:
+
+`filter()` works on rows, and
+`select()` works on columns
+
+## Saving our results
+
+Let's save our processed data in the `data/` directory. We'll save it as a `csv` file, which is short for *comma separated value*. This is a file type that can be easily imported into excel.
+
+
+```{r}
+processed_data <- smoke_complete %>%
+  select(-gender) %>%
+  filter(cigarettes_per_day < 20)
+
+write_excel_csv(x = processed_data,
+                path = "data/processed_data.csv")
+```
