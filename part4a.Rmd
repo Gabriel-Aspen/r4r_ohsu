@@ -1,0 +1,88 @@
+```{r}
+# load libraries
+library(tidyverse)
+library(readxl)
+library(janitor)
+
+smoke_complete <- read_excel("data/smoke_complete.xlsx",
+                             sheet=1,
+                             na="NA")
+```
+
+# mutate()
+```{r}
+smoke_complete %>%
+    mutate(age_at_death = (age_at_diagnosis + days_to_death)/365)
+```
+## combining functions --- signif()
+```{r}
+smoke_complete %>%
+    mutate(cigarettes_total =  cigarettes_per_day* days_to_death) %>%
+    mutate(cigarettes_total = signif(cigarettes_total, 1))
+```
+###  What is a factor??? part 1.
+
+# tabyl()
+- from the janitor package
+```{r}
+smoke_complete %>%
+    #reassign the gender variable to be a factor
+    mutate(gender = factor(gender, levels = c("female", "male"))) %>%
+    janitor::tabyl(gender) # we do this to point to the janitor package. In case we had another package with the same name
+```
+###quick cross table
+```{r}
+smoke_complete %>%
+    tabyl(disease, gender)
+
+```
+# mutate() "case_when"
+*condition* ~ *category_name*
+```{r}
+smoke_complete %>%
+    mutate(
+        cigarettes_category = case_when(
+          cigarettes_per_day <= 5 ~ '0-5',
+          cigarettes_per_day >5 & cigarettes_per_day <=10 ~ '6-10',
+          cigarettes_per_day > 10 ~ '11+'
+            )
+        ) %>%
+    mutate(cigarettes_category =
+               factor(cigarettes_category,
+                      levels = c("0-5", "6+")
+                      )
+           ) %>%
+    janitor::tabyl(cigarettes_category)
+```
+### mutate_if() - look into this
+
+# summarize()
+- produces summaries across the data
+Center: `mean()`, `median()`
+Spread: `sd()` (standard deviation)
+Range: `min()`, `max()`
+Position: `first()`, `last()`, `nth()`
+Count: `n()`, `n_distinct()`
+
+```{r}
+smoke_complete %>%
+    summarize(average_cigarettes = mean(cigarettes_per_day))
+
+```
+
+#group_by()/summarize()
+- splits data into separate dataframes by a category
+- Usually followed by summarize()
+```{r}
+smoke_complete %>%
+   group_by(gender, disease) %>%
+   summarize(mean_cigarettes = mean(cigarettes_per_day),
+            sd = sd(cigarettes_per_day))
+```
+# count()
+- use group_by to count things
+```{r}
+smoke_complete %>%
+    group_by(disease) %>%
+    summarize(count = n())
+```

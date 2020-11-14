@@ -5,7 +5,7 @@ library(readxl)
 ```
 ##  read_excel()
 ```{r}
-brca_clinical <- read_excel("data/fileshow.xlsx",
+brca_clinical <- read_excel("data/tcga_clinical_data.xlsx",
                             sheet = 1,
                             skip = 1,
                             na = "NA"
@@ -35,7 +35,7 @@ A `ggplot2` graphic consists of a:
 ggplot(data = brca_clinical) +
   aes(
     x = days_to_last_follow_up / 365,
-    y = days_to_birth
+    y = days_to_birth,
     color = gender
     ) +
   geom_point() +

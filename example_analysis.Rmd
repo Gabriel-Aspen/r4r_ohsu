@@ -1,0 +1,84 @@
+# Load libraries
+```{r}
+library(tidyverse)
+library(readxl)
+library(janitor)
+```
+# Load dataset
+```{r}
+brca_clinical <- read_excel("data/tcga_clinical_data.xlsx",
+  sheet = 1,
+  skip = 1,
+  na = "NA"
+  )
+
+  smoke_complete <- read_excel("data/smoke_complete.xlsx",
+                               sheet=1,
+                               na="NA")
+```
+# Look at data
+```{r}
+head(brca_clinical)
+tabyl(ethnicity)
+##  dim()
+##  head()
+##  colnames()
+##  glimpse()
+##  summary()
+##  view()
+```
+# Plot data
+```{r}
+ggplot(data = brca_clinical) +
+  aes(
+    x = year_of_birth,
+    y = days_to_last_follow_up,
+    color = gender
+    ) +
+  geom_point()
+
+#save if you want
+# ggsave("follow_up_plot.jpg")
+```
+# Find most common tumor tumor stage
+```{r}
+brca_clinical %>%
+    group_by(tumor_stage) %>%
+    summarize(count = n()) %>%
+    arrange(desc(count))
+```
+# Add feature for age class
+```{r}
+brca_clinical <- brca_clinical %>%
+    mutate(age_years = age_at_diagnosis / 365)
+brca_clinical <-
+    brca_clinical %>%
+    mutate(age_category =
+               case_when(age_years <= 40 ~ "0-40",
+                         age_years > 40 & age_years <= 55 ~ "40-55",
+                         age_years > 55 & age_years <= 70 ~ "55-70",
+                         age_years > 70 ~ "70+"
+
+
+                         )
+           ) %>%
+    mutate(age_category = factor(age_category,
+                                 levels = c("0-40",
+                                            "40-55",
+                                            "55-70",
+                                            "70+"
+                                            )
+                                 )
+           )
+
+```
+# Boxplot with facetwrap - two exact same plot separated by a category 
+```{r}
+ggplot(smoke_complete) +
+  aes(x = vital_status,
+    y = cigarettes_per_day,
+    fill = vital_status) +
+  geom_boxplot() +
+
+  facet_wrap(vars(gender))
+```
