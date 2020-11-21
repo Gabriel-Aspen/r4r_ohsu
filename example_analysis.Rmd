@@ -4,7 +4,7 @@ library(tidyverse)
 library(readxl)
 library(janitor)
 ```
-# Load dataset
+# Load datasets
 ```{r}
 brca_clinical <- read_excel("data/tcga_clinical_data.xlsx",
   sheet = 1,
@@ -19,7 +19,8 @@ brca_clinical <- read_excel("data/tcga_clinical_data.xlsx",
 # Look at data
 ```{r}
 head(brca_clinical)
-tabyl(ethnicity)
+smoke_complete %>%
+  tabyl(ethnicity, gender)
 ##  dim()
 ##  head()
 ##  colnames()
@@ -37,10 +38,10 @@ ggplot(data = brca_clinical) +
     ) +
   geom_point()
 
-#save if you want
+# save if you want
 # ggsave("follow_up_plot.jpg")
 ```
-# Find most common tumor tumor stage
+# Find most common tumor stage
 ```{r}
 brca_clinical %>%
     group_by(tumor_stage) %>%
@@ -72,7 +73,7 @@ brca_clinical <-
            )
 
 ```
-# Boxplot with facetwrap - two exact same plot separated by a category 
+# Boxplot with facetwrap - two exact same plot separated by a category
 ```{r}
 ggplot(smoke_complete) +
   aes(x = vital_status,

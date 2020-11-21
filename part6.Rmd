@@ -1,0 +1,138 @@
+# final project
+1. Find a dataset that youre interested in. It should be either in excel or csv
+2. Decide on a question youre interested in
+3. Explore the dataset and transform the variable
+4. visualize the dataset and talk about your insights
+
+# getting help
+# https://www.biostarhandbook.com/
+
+# Statistics
+# http://www.sthda.com/english/
+
+`tidymodels` attempts to unify all of the various modeling packages in a consistent interface.
+
+`broom` works mostly with the output of models. One of the problems with R is that the many modeling packages are not consistent to work with. It can be just as difficult to get a p-value out of a model as it is to run it on some data! `broom` simpliflies this a lot.
+
+# Load libraries
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(broom)
+library(readxl)
+library(janitor)
+library(GGally) #extends ggplot
+```
+# Load dataset. Assign boolean to gender (0 = females)
+```{r message=FALSE}
+body_comp <- read_csv('data/body_composition.csv', na="NA") %>%
+  clean_names() %>%
+  mutate(gender = factor(gender, levels=c("1", "0")))
+
+head(body_comp)
+```
+# Pivot to give methods a column. We are losing some info here
+```{r}
+body_comp_long <- body_comp %>%
+  pivot_longer(cols = c('dxa', 'st', 'br'),
+               names_to = 'method',
+               values_to = 'body_fat_percentage')
+head(body_comp_long)
+```
+# Boxplot it
+```{r warning=FALSE}
+ggplot(body_comp_long) +
+  aes(x = method, y = body_fat_percentage, fill = method) +
+  geom_boxplot() +
+  geom_jitter(color="grey")
+```
+
+# Paired T test
+- Use when we are examining the mean when the subjects are the SAME
+- We wouldnt use this if the subjects for each method were two separate groups
+- Can only be done between two groups - we'll do dxa and st
+
+```{r}
+body_comp_dxa_st <- body_comp_long %>%
+  filter(method %in% c("dxa", "st"))
+
+
+tidy_output2 <- t.test(body_comp$dxa, body_comp$st, paired=TRUE) %>%
+  tidy()
+
+# same thing?
+tidy_output <-
+  t.test(body_fat_percentage ~ method,
+        paired=TRUE,
+        data=body_comp_dxa_st) %>%
+    tidy()
+
+tidy_output2
+```
+
+# Now do it for dxa and br
+```{r eval=FALSE}
+body_comp <- body_comp %>%
+  tidyr::drop_na()
+
+body_comp_long <- body_comp %>%
+  pivot_longer(cols = c('dxa', 'st', 'br'),
+               names_to = 'method',
+               values_to = 'body_fat_percentage')
+
+body_comp_dxa_sf <- body_comp_long %>%
+  filter(method %in% c("dxa", "br"))
+
+tidy_output <-
+  t.test(body_fat_percentage ~ method,
+       paired=TRUE,
+       data=body_comp_dxa_sf) %>%
+    tidy()
+
+tidy_output
+```
+
+
+# Linear regression - how correlated are the three variables?
+
+# ggpairs() - a lot of info in one plot. Keep the variables low
+```{r message=FALSE}
+GGally::ggpairs(body_comp,  aes(color=gender))  
+```
+# Linear method trendline
+```{r}
+body_comp %>%
+  ggplot() +
+  aes(x=dxa, y=st) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) #se = True will add the standard error
+
+```
+
+
+# Building linear model
+```{r}
+# dependent variable on left of ~
+lm(dxa ~ st, data=body_comp) %>%
+  tidy()
+```
+The predicted line through the data is:
+dxa  = 0.295    +    0.903 * `st`
+# Adding another variable (gender)
+
+```{r}
+copy_number <- c("1", "0", "2")
+
+
+lm(dxa ~ st + gender, data=body_comp) %>%
+  tidy()
+```
+dxa = 0.097 +   0.889 * `st`    +    0.536 * `gender0`
+
+# Adding br
+```{r}
+lm(dxa ~ st + br, data=body_comp) %>%
+  tidy()
+```
+Multicolinearity: adding the same information multiple times in the models
+- Can make terms that should be significant not significant ***
+- This is what happens when we add 'br' into the model (changes p value!)

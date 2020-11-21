@@ -123,7 +123,7 @@ library(broom)
 ```{r message=FALSE}
 body_comp <- read_csv('data/body_composition.csv', na="NA") %>%
   clean_names() %>%
-  mutate(gender = factor(gender, levels=c("1", "0")))
+  mutate(gender = factor(gender, levels=c("1", "0"))) #1=females
 
 head(body_comp)
 ```

@@ -11,10 +11,26 @@ Link: [Ready for R](https://ready4r.netlify.app/)
 4. Visualize datasets using ggplot2 and understand how to build basic plots using ggplot2 syntax.
 5. Filter and format data in R for use with various routines.
 6. Execute and Interpret some basic statistics in R.
-  
-## Tools:
-### RStudio Cloud
+
+## Libraries:
+### Base R
+- t.test()
 ### tidyverse
-- **ggplot2**: Plotting data
+- **ggplot2**: Plotting data with ggplot(), aes() and:
+  - geom_jitter()
+  - geom_boxplot()
+  - geom_point()
+  - + geom_smooth(): method = 'lm' for linear models
 - **dplyr**: Data manipulation
-- **readxl**: Excel to R
+- **readxl**: read Excel/csv
+- **forcats**
+### janitor
+- **tabyl**
+###tidymodels
+- broom
+  - tidy(): can show coefficients and p-values. Use in conjunction with lm()
+  - glance(): additional measures on your model (R-squared, log likelihood, and AIC/BIC)
+  - augment() - make predictions with your model using new data
+### GGally: Extends ggplot
+- ggpairs(): Pairplot
+### readxl:
