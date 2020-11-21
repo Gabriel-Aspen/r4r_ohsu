@@ -26,7 +26,7 @@ Link: [Ready for R](https://ready4r.netlify.app/)
 - **forcats**
 ### janitor
 - **tabyl**
-###tidymodels
+### tidymodels
 - broom
   - tidy(): can show coefficients and p-values. Use in conjunction with lm()
   - glance(): additional measures on your model (R-squared, log likelihood, and AIC/BIC)
